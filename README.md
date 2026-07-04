@@ -32,6 +32,7 @@ This project is not a full Microsoft To Do replacement. It is a small, frameless
 - Tray/menu-bar menu and quick-add shortcut:
   - Windows: `Ctrl + Alt + T`
   - macOS: `Cmd + Option + T`
+- Native macOS WidgetKit extension scaffold for a compact Today/Main task widget.
 
 ## Tech Stack
 
@@ -165,6 +166,46 @@ Build outputs are written under:
 ```text
 src-tauri/target/release/bundle/
 ```
+
+## macOS Native Widget
+
+The Tauri app remains the full application. It handles Microsoft login, sync, settings, editing, and the detailed task window.
+
+The native macOS WidgetKit extension lives in:
+
+```text
+macos-widget/
+```
+
+It is intentionally small: it reads a `todo-widget-snapshot.json` file from the shared App Group container and renders the Today/Main task list. It does not run the React UI and does not perform Microsoft sync itself.
+
+The host app exports the snapshot to:
+
+```text
+~/Library/Group Containers/<APP_GROUP_ID>/todo-widget-snapshot.json
+```
+
+Before building the widget for a real Apple Developer account, replace the placeholder App Group:
+
+```text
+group.com.local.ms-todo-desktop-widget
+```
+
+with your real App Group ID in:
+
+- `macos-widget/Sources/WidgetConfig.swift`
+- `macos-widget/Entitlements/TodoWidgetExtension.entitlements`
+- `macos-widget/Entitlements/HostApp.entitlements`
+- `macos-widget/project.yml`
+- `.env` or `ms-todo-desktop-widget.config.json` as `MACOS_APP_GROUP_ID` / `macos_app_group_id`
+
+Build the WidgetKit extension on macOS:
+
+```bash
+./scripts/build-macos-widget-extension.sh
+```
+
+Final release packaging still needs to embed the built `.appex` into the `.app` bundle and sign both the app and extension with matching App Group entitlements.
 
 ## Data Storage
 

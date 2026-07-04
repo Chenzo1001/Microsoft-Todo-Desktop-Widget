@@ -8,7 +8,7 @@ use crate::{
         AuthStatusDto, LoginStartDto, SettingsDto, SettingsPatch, SyncStatusDto, TaskDto,
         TaskListDto, TaskPatchDto,
     },
-    settings, sync, AppState,
+    settings, sync, widget_snapshot, AppState,
 };
 
 #[tauri::command]
@@ -94,7 +94,9 @@ pub fn add_task(
         .db
         .lock()
         .map_err(|_| "database lock poisoned".to_string())?;
-    db::insert_local_task(&conn, title.trim(), &role).map_err(to_string)
+    let task = db::insert_local_task(&conn, title.trim(), &role).map_err(to_string)?;
+    let _ = widget_snapshot::export_today(&conn, &state.macos_app_group_id);
+    Ok(task)
 }
 
 #[tauri::command]
@@ -107,7 +109,9 @@ pub fn add_task_to_list(
         .db
         .lock()
         .map_err(|_| "database lock poisoned".to_string())?;
-    db::insert_local_task_for_list(&conn, title.trim(), &list_id).map_err(to_string)
+    let task = db::insert_local_task_for_list(&conn, title.trim(), &list_id).map_err(to_string)?;
+    let _ = widget_snapshot::export_today(&conn, &state.macos_app_group_id);
+    Ok(task)
 }
 
 #[tauri::command]
@@ -116,7 +120,9 @@ pub fn complete_task(state: State<'_, AppState>, task_id: String) -> Result<(), 
         .db
         .lock()
         .map_err(|_| "database lock poisoned".to_string())?;
-    db::complete_local_task(&conn, &task_id).map_err(to_string)
+    db::complete_local_task(&conn, &task_id).map_err(to_string)?;
+    let _ = widget_snapshot::export_today(&conn, &state.macos_app_group_id);
+    Ok(())
 }
 
 #[tauri::command]
@@ -129,7 +135,9 @@ pub fn update_task(
         .db
         .lock()
         .map_err(|_| "database lock poisoned".to_string())?;
-    db::update_local_task(&conn, &task_id, &patch).map_err(to_string)
+    let task = db::update_local_task(&conn, &task_id, &patch).map_err(to_string)?;
+    let _ = widget_snapshot::export_today(&conn, &state.macos_app_group_id);
+    Ok(task)
 }
 
 #[tauri::command]

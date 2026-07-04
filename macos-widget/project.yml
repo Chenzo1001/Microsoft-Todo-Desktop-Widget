@@ -1,0 +1,29 @@
+name: MicrosoftTodoWidget
+options:
+  bundleIdPrefix: com.local
+  deploymentTarget:
+    macOS: "14.0"
+settings:
+  base:
+    APP_GROUP_ID: group.com.local.ms-todo-desktop-widget
+targets:
+  TodoWidgetExtension:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.local.ms-todo-desktop-widget.widget
+        PRODUCT_NAME: TodoWidgetExtension
+        INFOPLIST_FILE: Info.plist
+        CODE_SIGN_ENTITLEMENTS: Entitlements/TodoWidgetExtension.entitlements
+        SKIP_INSTALL: "NO"
+        APPLICATION_EXTENSION_API_ONLY: "YES"
+        SWIFT_VERSION: "5.0"
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: Todo Widget
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension

@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use rusqlite::{params, Connection, OptionalExtension};
 
-use crate::{auth, db, graph, models::SyncStatusDto, AppState};
+use crate::{auth, db, graph, models::SyncStatusDto, widget_snapshot, AppState};
 
 pub async fn sync_now(state: &AppState) -> SyncStatusDto {
     let previous_last_synced = state
@@ -64,7 +64,13 @@ async fn sync_inner(state: &AppState) -> anyhow::Result<String> {
         .db
         .lock()
         .map_err(|_| anyhow!("database lock poisoned"))?;
-    db::set_last_synced_at(&conn)
+    let last_synced_at = db::set_last_synced_at(&conn)?;
+    let _ = widget_snapshot::export_today_with_last_synced(
+        &conn,
+        &state.macos_app_group_id,
+        Some(last_synced_at.clone()),
+    );
+    Ok(last_synced_at)
 }
 
 async fn sync_list_inner(state: &AppState, list_id: &str) -> anyhow::Result<String> {
@@ -89,7 +95,13 @@ async fn sync_list_inner(state: &AppState, list_id: &str) -> anyhow::Result<Stri
         .db
         .lock()
         .map_err(|_| anyhow!("database lock poisoned"))?;
-    db::set_last_synced_at(&conn)
+    let last_synced_at = db::set_last_synced_at(&conn)?;
+    let _ = widget_snapshot::export_today_with_last_synced(
+        &conn,
+        &state.macos_app_group_id,
+        Some(last_synced_at.clone()),
+    );
+    Ok(last_synced_at)
 }
 
 pub async fn ensure_core_lists(state: &AppState, access_token: &str) -> anyhow::Result<()> {

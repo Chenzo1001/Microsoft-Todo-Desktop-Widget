@@ -9,6 +9,12 @@ struct AuthConfig {
     microsoft_client_id: Option<String>,
     #[serde(alias = "tenant", alias = "MICROSOFT_TENANT")]
     microsoft_tenant: Option<String>,
+    #[serde(
+        alias = "appGroupId",
+        alias = "app_group_id",
+        alias = "MACOS_APP_GROUP_ID"
+    )]
+    macos_app_group_id: Option<String>,
 }
 
 pub fn client_id(app: &tauri::App) -> Option<String> {
@@ -26,6 +32,15 @@ pub fn tenant(app: &tauri::App) -> String {
         read_config(app).and_then(|config| config.microsoft_tenant),
     ])
     .unwrap_or_else(|| "consumers".to_string())
+}
+
+pub fn macos_app_group_id(app: &tauri::App) -> String {
+    first_non_empty([
+        std::env::var("MACOS_APP_GROUP_ID").ok(),
+        option_env!("MACOS_APP_GROUP_ID").map(ToString::to_string),
+        read_config(app).and_then(|config| config.macos_app_group_id),
+    ])
+    .unwrap_or_else(|| "group.com.local.ms-todo-desktop-widget".to_string())
 }
 
 fn first_non_empty(values: impl IntoIterator<Item = Option<String>>) -> Option<String> {

@@ -9,6 +9,7 @@ mod models;
 mod settings;
 mod sync;
 mod tray;
+mod widget_snapshot;
 
 use std::{collections::HashMap, sync::Mutex};
 
@@ -24,6 +25,7 @@ pub struct AppState {
     pub detail_windows: Mutex<HashMap<String, String>>,
     pub client_id: Option<String>,
     pub tenant: String,
+    pub macos_app_group_id: String,
 }
 
 impl AppState {
@@ -40,6 +42,8 @@ impl AppState {
         db::ensure_local_core_lists(&conn)?;
         let settings = db::load_settings(&conn)?;
         debug_console::apply(settings.debug_mode);
+        let macos_app_group_id = config::macos_app_group_id(app);
+        let _ = widget_snapshot::export_today(&conn, &macos_app_group_id);
 
         Ok(Self {
             db: Mutex::new(conn),
@@ -51,6 +55,7 @@ impl AppState {
             detail_windows: Mutex::new(HashMap::new()),
             client_id: config::client_id(app),
             tenant: config::tenant(app),
+            macos_app_group_id,
         })
     }
 }
