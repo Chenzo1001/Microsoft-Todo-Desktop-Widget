@@ -1,6 +1,10 @@
 # ms-todo-desktop-widget
 
-A lightweight Windows desktop widget for Microsoft To Do.
+A lightweight desktop widget for Microsoft To Do on Windows and macOS.
+
+[![GitHub release (latest by date including pre-releases)](https://Chenzo1001/Microsoft-Todo-Desktop-Widget/assets/Main.jpg)](https://github.com/Chenzo1001/Microsoft-Todo-Desktop-Widget)
+[![Settings](https://Chenzo1001/Microsoft-Todo-Desktop-Widget/assets/Settings.jpg)](https://github.com/Chenzo1001/Microsoft-Todo-Desktop-Widget)
+[![Task Details](https://Chenzo1001/Microsoft-Todo-Desktop-Widget/assets/Details.jpg)](https://github.com/Chenzo1001/Microsoft-Todo-Desktop-Widget)
 
 This is not a full Microsoft To Do replacement. It is a small desktop surface for the tasks you want visible all day:
 
@@ -20,7 +24,9 @@ The current implementation has the MVP framework in place:
 - Microsoft browser sign-in with Authorization Code + PKCE and a local loopback callback.
 - Microsoft Graph To Do API client scaffold.
 - Pending operation queue for offline/local-first sync.
-- Tray menu and `Ctrl + Alt + T` quick-add shortcut.
+- Tray/menu-bar menu and quick-add shortcut:
+  - Windows: `Ctrl + Alt + T`
+  - macOS: `Cmd + Option + T`
 - Basic settings persistence for opacity, pinning, sync interval, and autostart preference.
 
 Autostart is currently persisted as a setting only. Wiring it to `tauri-plugin-autostart` is a follow-up.
@@ -59,7 +65,7 @@ $env:MICROSOFT_TENANT = "consumers"
 
 `MICROSOFT_TENANT` defaults to `consumers` when omitted. Use `common` if you want to allow work or school accounts.
 
-For a built `.exe`, environment variables from your current terminal may not exist when you double-click the app. Use one of these instead:
+For a built app, environment variables from your current terminal may not exist when you double-click it. Use one of these instead:
 
 1. Build with the client id baked in:
 
@@ -68,7 +74,14 @@ $env:MICROSOFT_CLIENT_ID = "your Azure app client id"
 npm run tauri:build
 ```
 
-2. Or place `ms-todo-desktop-widget.config.json` next to the `.exe`:
+On macOS:
+
+```bash
+export MICROSOFT_CLIENT_ID="your Azure app client id"
+npm run tauri:build:mac
+```
+
+2. Or place `ms-todo-desktop-widget.config.json` next to the executable/app bundle:
 
 ```json
 {
@@ -96,6 +109,15 @@ npm run dev
 npm run tauri:build
 ```
 
+macOS bundles must be built on macOS:
+
+```bash
+npm install
+./scripts/build-tauri-with-env.sh
+```
+
+This produces the macOS `.app` and `.dmg` under `src-tauri/target/release/bundle/`.
+
 ## Data Storage
 
 The SQLite cache is stored in the Tauri app data directory under:
@@ -104,7 +126,7 @@ The SQLite cache is stored in the Tauri app data directory under:
 ms-todo-desktop-widget/cache.sqlite3
 ```
 
-The exact base directory depends on Windows and Tauri's app data resolution.
+The exact base directory depends on the OS and Tauri's app data resolution.
 
 ## Token Security
 
