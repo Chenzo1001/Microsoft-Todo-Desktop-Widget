@@ -1,0 +1,4 @@
+{
+  "microsoft_client_id": "your Azure app client id",
+  "microsoft_tenant": "consumers"
+}
