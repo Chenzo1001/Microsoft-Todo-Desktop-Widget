@@ -12,11 +12,11 @@ export function taskDateKey(value?: string | null, timeZone?: string | null) {
   return Number.isFinite(date.getTime()) ? localDateKey(date) : datePart;
 }
 
-export function formatTaskDate(value?: string | null, timeZone?: string | null) {
+export function formatTaskDate(value?: string | null, timeZone?: string | null, locale?: string) {
   const key = taskDateKey(value, timeZone);
   if (!key) return "";
   const [year, month, day] = key.split("-").map(Number);
-  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+  return new Date(year, month - 1, day).toLocaleDateString(locale || undefined, {
     month: "short",
     day: "numeric",
   });

@@ -1,87 +1,107 @@
-# ms-todo-desktop-widget
+# Microsoft To Do Desktop Widget
 
 A lightweight desktop widget for Microsoft To Do on Windows and macOS.
 
-[![GitHub release (latest by date including pre-releases)](https://Chenzo1001/Microsoft-Todo-Desktop-Widget/assets/Main.jpg)](https://github.com/Chenzo1001/Microsoft-Todo-Desktop-Widget)
-[![Settings](https://Chenzo1001/Microsoft-Todo-Desktop-Widget/assets/Settings.jpg)](https://github.com/Chenzo1001/Microsoft-Todo-Desktop-Widget)
-[![Task Details](https://Chenzo1001/Microsoft-Todo-Desktop-Widget/assets/Details.jpg)](https://github.com/Chenzo1001/Microsoft-Todo-Desktop-Widget)
+This project is not a full Microsoft To Do replacement. It is a small, frameless desktop surface for the tasks you want visible throughout the day, while Microsoft To Do remains the source of truth.
 
-This is not a full Microsoft To Do replacement. It is a small desktop surface for the tasks you want visible all day:
+## Screenshots
 
-- See open tasks in the `Today` list.
-- Add tasks quickly.
-- Complete tasks with one click.
-- Sync through Microsoft Graph so the official Microsoft To Do apps remain the source of truth.
+![Main widget](assets/Main.jpg)
 
-## Status
+![Settings](assets/Settings.jpg)
 
-The current implementation has the MVP framework in place:
+![Task details](assets/Details.jpg)
 
-- Tauri v2 + React + TypeScript + Vite.
-- Frameless transparent widget window.
-- Local SQLite cache.
-- Local-first add and complete commands.
-- Microsoft browser sign-in with Authorization Code + PKCE and a local loopback callback.
-- Microsoft Graph To Do API client scaffold.
-- Pending operation queue for offline/local-first sync.
+## Features
+
+- Frameless transparent desktop widget with right-click menu controls.
+- Microsoft browser sign-in with Authorization Code + PKCE.
+- Microsoft Graph sync for To Do lists and tasks.
+- Remote list selector, including custom Microsoft To Do lists.
+- Local SQLite cache with pending operation queue.
+- Add, complete, edit, and sync tasks.
+- Task details window with due date, reminder, repeat, importance, and notes.
+- Task sorting by due date, importance, modified time, created time, reminder, and title.
+- Optional completed-task display with distinct completed styling.
+- Due-today and overdue task highlighting.
+- Adjustable opacity, font family, text size, sync interval, and debug console.
+- i18n support:
+  - System language
+  - English
+  - Simplified Chinese
 - Tray/menu-bar menu and quick-add shortcut:
   - Windows: `Ctrl + Alt + T`
   - macOS: `Cmd + Option + T`
-- Basic settings persistence for opacity, pinning, sync interval, and autostart preference.
 
-Autostart is currently persisted as a setting only. Wiring it to `tauri-plugin-autostart` is a follow-up.
+## Tech Stack
+
+- Tauri v2
+- React
+- TypeScript
+- Vite
+- Rust
+- SQLite via `rusqlite`
+- Microsoft Graph To Do API
+
+## Download
+
+Use the GitHub Releases page for prebuilt installers when available.
+
+For source builds, follow the setup steps below.
 
 ## Azure App Registration
 
-Create an app registration in Microsoft Entra:
+Microsoft sign-in requires an Azure App Registration. This app is a desktop public client, so do not create or use a client secret.
 
-1. Open Azure Portal.
+1. Open the Azure Portal.
 2. Go to Microsoft Entra ID.
 3. Create an App Registration.
-4. Supported account types:
-   - Personal Microsoft accounts only if you use `consumers`.
-   - Any org directory and personal accounts if you use `common`.
-5. Enable public client/native flows if required by your tenant settings.
-6. Add a desktop/native redirect URI for loopback login:
-   - `http://127.0.0.1`
-   - If your tenant requires an exact URI, add the URI shown in the Microsoft redirect mismatch error.
-7. Add delegated Microsoft Graph permissions:
+4. Choose supported account types:
+   - Use `consumers` for personal Microsoft accounts only.
+   - Use `common` for both work/school and personal Microsoft accounts.
+5. Add a redirect URI under **Mobile and desktop applications**:
+   - `http://localhost`
+   - The app uses a local loopback callback with a dynamic port.
+   - If Azure shows a redirect mismatch, add the exact URI shown in the error.
+6. Add delegated Microsoft Graph permissions:
    - `User.Read`
    - `Tasks.ReadWrite`
    - `offline_access`
+7. Enable public client/native flows if your tenant requires it.
 
-Do not create or use a client secret. This is a desktop public client.
+## Client ID Configuration
 
-## Microsoft Client ID Configuration
+`MICROSOFT_CLIENT_ID` is not a secret, but source builds should normally use their own Azure App Registration.
 
-Microsoft sign-in requires an Azure App Registration client id. The app does not expose this in the UI.
-
-For development, set these before running Tauri:
+For development:
 
 ```powershell
 $env:MICROSOFT_CLIENT_ID = "your Azure app client id"
 $env:MICROSOFT_TENANT = "consumers"
+npm run tauri:dev
 ```
 
-`MICROSOFT_TENANT` defaults to `consumers` when omitted. Use `common` if you want to allow work or school accounts.
+`MICROSOFT_TENANT` defaults to `consumers` when omitted.
 
-For a built app, environment variables from your current terminal may not exist when you double-click it. Use one of these instead:
+You can also create a local `.env` file:
 
-1. Build with the client id baked in:
+```env
+MICROSOFT_CLIENT_ID=your Azure app client id
+MICROSOFT_TENANT=consumers
+```
+
+Do not commit `.env`.
+
+For installed builds, either bake the client ID in at build time or place a config file next to the executable/app bundle.
+
+Build-time configuration:
 
 ```powershell
 $env:MICROSOFT_CLIENT_ID = "your Azure app client id"
 npm run tauri:build
 ```
 
-On macOS:
-
-```bash
-export MICROSOFT_CLIENT_ID="your Azure app client id"
-npm run tauri:build:mac
-```
-
-2. Or place `ms-todo-desktop-widget.config.json` next to the executable/app bundle:
+Runtime config file:
 
 ```json
 {
@@ -90,14 +110,23 @@ npm run tauri:build:mac
 }
 ```
 
-## Run
+Use `ms-todo-desktop-widget.config.example.json` as the template.
+
+## Development
+
+Install dependencies:
 
 ```powershell
 npm install
+```
+
+Run the Tauri app:
+
+```powershell
 npm run tauri:dev
 ```
 
-The Vite-only frontend can be checked with:
+Run the Vite-only frontend:
 
 ```powershell
 npm run dev
@@ -105,8 +134,16 @@ npm run dev
 
 ## Build
 
+Windows:
+
 ```powershell
 npm run tauri:build
+```
+
+Or load `.env` automatically:
+
+```powershell
+.\scripts\build-tauri-with-env.ps1
 ```
 
 macOS bundles must be built on macOS:
@@ -116,28 +153,44 @@ npm install
 ./scripts/build-tauri-with-env.sh
 ```
 
-This produces the macOS `.app` and `.dmg` under `src-tauri/target/release/bundle/`.
+Or:
+
+```bash
+export MICROSOFT_CLIENT_ID="your Azure app client id"
+npm run tauri:build:mac
+```
+
+Build outputs are written under:
+
+```text
+src-tauri/target/release/bundle/
+```
 
 ## Data Storage
 
-The SQLite cache is stored in the Tauri app data directory under:
+The SQLite cache is stored in the Tauri app data directory:
 
 ```text
 ms-todo-desktop-widget/cache.sqlite3
 ```
 
-The exact base directory depends on the OS and Tauri's app data resolution.
+The exact base directory depends on the operating system and Tauri's app data resolution.
 
-## Token Security
+Refresh tokens are stored with the OS credential store through the Rust `keyring` crate. Access tokens are requested by the Rust backend and are not exposed to React or browser local storage.
 
-The refresh token is stored with the OS credential store through the Rust `keyring` crate. Access tokens are requested by the Rust backend and are not exposed to React or browser local storage.
+## Notes For Open Source Builds
 
-## Core Lists
+- Do not commit `.env`, local database files, tokens, or user data.
+- `MICROSOFT_CLIENT_ID` can be public, but using your own client ID for public releases means other builds may appear under your Azure app identity.
+- Do not add a client secret. Desktop apps should use public client + PKCE.
+- Keep Graph permissions minimal unless a feature requires more.
 
-On sync, the backend ensures these Microsoft To Do lists exist:
+## Current Limitations
 
-- `Today`
-- `Inbox`
-- `This Week`
+- Autostart is currently stored as a setting, but OS-level autostart wiring is still a follow-up.
+- macOS packages must be built on macOS.
+- This app focuses on a compact widget experience, not complete Microsoft To Do feature parity.
 
-The main widget displays uncompleted tasks from `Today`. The quick-add overlay defaults to `Inbox`.
+## License
+
+Add a license before publishing the repository publicly.

@@ -30,6 +30,7 @@ let mockSettings: Settings = {
   autostart: false,
   debugMode: false,
   showCompleted: false,
+  language: "system",
   fontFamily: "system",
   fontScale: 1,
 };

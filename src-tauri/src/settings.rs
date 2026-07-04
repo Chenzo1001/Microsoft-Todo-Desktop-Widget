@@ -25,6 +25,13 @@ pub fn apply_patch(mut settings: SettingsDto, patch: SettingsPatch) -> SettingsD
         settings.show_completed = value;
     }
 
+    if let Some(value) = patch.language {
+        settings.language = match value.as_str() {
+            "en" | "zh-CN" => value,
+            _ => "system".to_string(),
+        };
+    }
+
     if let Some(value) = patch.font_family {
         settings.font_family = match value.as_str() {
             "compact" | "serif" | "mono" => value,

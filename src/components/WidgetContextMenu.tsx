@@ -1,4 +1,5 @@
 import { EyeOff, Pin, PinOff, RefreshCw, Settings } from "lucide-react";
+import { useI18n } from "../lib/i18n";
 
 type Props = {
   open: boolean;
@@ -23,6 +24,8 @@ export function WidgetContextMenu({
   onOpenSettings,
   onHide,
 }: Props) {
+  const { t } = useI18n();
+
   if (!open) return null;
 
   function run(action: () => void) {
@@ -40,19 +43,19 @@ export function WidgetContextMenu({
       >
         <button onClick={() => run(onRefresh)}>
           <RefreshCw size={15} />
-          Sync now
+          {t("context.syncNow")}
         </button>
         <button onClick={() => run(onTogglePinned)}>
           {isPinned ? <PinOff size={15} /> : <Pin size={15} />}
-          {isPinned ? "Unpin" : "Pin"}
+          {isPinned ? t("title.unpin") : t("title.pin")}
         </button>
         <button onClick={() => run(onOpenSettings)}>
           <Settings size={15} />
-          Settings
+          {t("title.settings")}
         </button>
         <button onClick={() => run(onHide)}>
           <EyeOff size={15} />
-          Close to tray
+          {t("context.closeToTray")}
         </button>
       </menu>
     </div>

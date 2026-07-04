@@ -13,6 +13,7 @@ import { QuickAddOverlay } from "./components/QuickAddOverlay";
 import { TaskDetailsPanel } from "./components/TaskDetailsPanel";
 import { WidgetContextMenu } from "./components/WidgetContextMenu";
 import { compareTaskDueDates } from "./lib/dates";
+import { I18nProvider, useI18n } from "./lib/i18n";
 
 const defaultStatus: SyncStatus = { state: "idle" };
 const defaultSettings: Settings = {
@@ -22,6 +23,7 @@ const defaultSettings: Settings = {
   autostart: false,
   debugMode: false,
   showCompleted: false,
+  language: "system",
   fontFamily: "system",
   fontScale: 1,
 };
@@ -132,7 +134,8 @@ function WidgetApp() {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.ctrlKey && event.altKey && event.key.toLowerCase() === "t") {
+      const quickAddShortcut = (event.ctrlKey && event.altKey) || (event.metaKey && event.altKey);
+      if (quickAddShortcut && event.key.toLowerCase() === "t") {
         event.preventDefault();
         setQuickAddOpen(true);
       }
@@ -273,7 +276,8 @@ function WidgetApp() {
   }
 
   return (
-    <WidgetShell opacity={settings.opacity} fontFamily={settings.fontFamily} fontScale={settings.fontScale}>
+    <I18nProvider language={settings.language}>
+      <WidgetShell opacity={settings.opacity} fontFamily={settings.fontFamily} fontScale={settings.fontScale}>
       <TitleBar
         isPinned={settings.alwaysOnTop}
         taskLists={taskLists}
@@ -299,6 +303,7 @@ function WidgetApp() {
       <TaskList
         tasks={visibleTasks}
         listName={selectedList?.displayName}
+        listRole={selectedList?.role}
         completingIds={completingIds}
         onComplete={handleComplete}
         onOpenDetails={(task) => void api.openTaskDetails(task.id)}
@@ -329,8 +334,9 @@ function WidgetApp() {
         onHide={() => void hideWindow()}
       />
 
-      <QuickAddOverlay open={quickAddOpen} onAdd={handleAdd} onClose={() => setQuickAddOpen(false)} />
-    </WidgetShell>
+        <QuickAddOverlay open={quickAddOpen} onAdd={handleAdd} onClose={() => setQuickAddOpen(false)} />
+      </WidgetShell>
+    </I18nProvider>
   );
 }
 
@@ -456,7 +462,7 @@ function TaskDetailsWindow({ taskId, windowLabel }: { taskId: string | null; win
           setResolvedTaskId(nextTaskId);
           setError(null);
         } else {
-          setError("Task details could not be resolved for this window.");
+          setError("details.resolveError");
         }
       })
       .catch((resolveError) => {
@@ -511,6 +517,41 @@ function TaskDetailsWindow({ taskId, windowLabel }: { taskId: string | null; win
   }
 
   return (
+    <I18nProvider language={settings.language}>
+      <TaskDetailsWindowFrame
+        settings={settings}
+        task={task}
+        taskList={taskList}
+        saving={saving}
+        error={error}
+        onClose={closeWindow}
+        onSave={handleSave}
+      />
+    </I18nProvider>
+  );
+}
+
+function TaskDetailsWindowFrame({
+  settings,
+  task,
+  taskList,
+  saving,
+  error,
+  onClose,
+  onSave,
+}: {
+  settings: Settings;
+  task: Task | null;
+  taskList?: TodoList;
+  saving: boolean;
+  error: string | null;
+  onClose: () => void;
+  onSave: (taskId: string, patch: TaskPatch) => Promise<void>;
+}) {
+  const { t } = useI18n();
+  const displayError = error === "details.resolveError" ? t("details.resolveError") : error;
+
+  return (
     <main
       className="details-window"
       data-font={settings.fontFamily}
@@ -522,15 +563,15 @@ function TaskDetailsWindow({ taskId, windowLabel }: { taskId: string | null; win
           taskList={taskList}
           saving={saving}
           windowed
-          onClose={closeWindow}
-          onSave={handleSave}
+          onClose={onClose}
+          onSave={onSave}
         />
       ) : (
         <div className="details-loading">
-          <span>{error || "Loading task..."}</span>
+          <span>{displayError || t("details.loading")}</span>
         </div>
       )}
-      {error && task ? <div className="details-error">{error}</div> : null}
+      {displayError && task ? <div className="details-error">{displayError}</div> : null}
     </main>
   );
 }

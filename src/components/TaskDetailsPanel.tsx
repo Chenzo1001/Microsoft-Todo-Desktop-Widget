@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { useEffect, useMemo, useState, type PointerEvent } from "react";
 import { api } from "../lib/api";
 import { taskDateKey } from "../lib/dates";
+import { useI18n } from "../lib/i18n";
 import type { Recurrence, RecurrenceMode, Task, TaskList, TaskPatch } from "../lib/types";
 
 type Props = {
@@ -14,15 +15,8 @@ type Props = {
   onSave: (taskId: string, patch: TaskPatch) => Promise<void>;
 };
 
-const recurrenceOptions: Array<{ value: RecurrenceMode; label: string }> = [
-  { value: "none", label: "Does not repeat" },
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
-];
-
 export function TaskDetailsPanel({ task, taskList, saving, windowed, onClose, onSave }: Props) {
+  const { t } = useI18n();
   const [title, setTitle] = useState("");
   const [importance, setImportance] = useState<"low" | "normal" | "high">("normal");
   const [note, setNote] = useState("");
@@ -57,6 +51,14 @@ export function TaskDetailsPanel({ task, taskList, saving, windowed, onClose, on
 
   if (!task) return null;
 
+  const recurrenceOptions: Array<{ value: RecurrenceMode; label: string }> = [
+    { value: "none", label: t("details.repeatNone") },
+    { value: "daily", label: t("details.repeatDaily") },
+    { value: "weekly", label: t("details.repeatWeekly") },
+    { value: "monthly", label: t("details.repeatMonthly") },
+    { value: "yearly", label: t("details.repeatYearly") },
+  ];
+
   function handleHeaderPointerDown(event: PointerEvent<HTMLElement>) {
     if (!windowed || event.button !== 0) return;
     const target = event.target as HTMLElement;
@@ -83,33 +85,33 @@ export function TaskDetailsPanel({ task, taskList, saving, windowed, onClose, on
     <aside className={clsx("details-panel", windowed && "details-panel--window")}>
       <div className={clsx("details-panel__header", windowed && "details-panel__header--draggable")} onPointerDown={handleHeaderPointerDown}>
         <div>
-          <h2>Task details</h2>
-          <span>{taskList?.displayName || "Current list"}</span>
+          <h2>{t("details.title")}</h2>
+          <span>{taskList?.displayName || t("app.currentList")}</span>
         </div>
-        <button className="icon-button" title="Close details" onClick={onClose}>
+        <button className="icon-button" title={t("details.close")} onClick={onClose}>
           <X size={16} />
         </button>
       </div>
 
       <div className="details-form">
         <label className="details-field details-field--title">
-          <span>Title</span>
+          <span>{t("details.fieldTitle")}</span>
           <input value={title} onChange={(event) => setTitle(event.target.value)} />
         </label>
 
         <label className="details-field">
-          <span>Importance</span>
+          <span>{t("details.importance")}</span>
           <select value={importance} onChange={(event) => setImportance(event.target.value as typeof importance)}>
-            <option value="low">Low</option>
-            <option value="normal">Normal</option>
-            <option value="high">High</option>
+            <option value="low">{t("details.importanceLow")}</option>
+            <option value="normal">{t("details.importanceNormal")}</option>
+            <option value="high">{t("details.importanceHigh")}</option>
           </select>
         </label>
 
         <label className="details-field">
           <span>
             <CalendarDays size={14} />
-            Due
+            {t("details.due")}
           </span>
           <input type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
         </label>
@@ -117,7 +119,7 @@ export function TaskDetailsPanel({ task, taskList, saving, windowed, onClose, on
         <label className="details-field details-field--checkbox">
           <span>
             <Bell size={14} />
-            Remind me
+            {t("details.remindMe")}
           </span>
           <input
             type="checkbox"
@@ -127,7 +129,7 @@ export function TaskDetailsPanel({ task, taskList, saving, windowed, onClose, on
         </label>
 
         <label className="details-field">
-          <span>Reminder time</span>
+          <span>{t("details.reminderTime")}</span>
           <input
             type="datetime-local"
             value={reminderDateTime}
@@ -139,7 +141,7 @@ export function TaskDetailsPanel({ task, taskList, saving, windowed, onClose, on
         <label className="details-field">
           <span>
             <Repeat size={14} />
-            Repeat
+            {t("details.repeat")}
           </span>
           <select
             value={recurrenceMode}
@@ -156,16 +158,16 @@ export function TaskDetailsPanel({ task, taskList, saving, windowed, onClose, on
         <label className="details-field details-field--notes">
           <span>
             <StickyNote size={14} />
-            Notes
+            {t("details.notes")}
           </span>
           <textarea value={note} rows={5} onChange={(event) => setNote(event.target.value)} />
         </label>
       </div>
 
       <div className="details-actions">
-        <span>{task.dirty ? "Waiting to upload" : "Synced"}</span>
+        <span>{task.dirty ? t("details.waitingUpload") : t("details.synced")}</span>
         <button className="text-button" disabled={!dirty || saving} onClick={() => void submit()}>
-          {saving ? "Saving..." : "Save"}
+          {saving ? t("details.saving") : t("details.save")}
         </button>
       </div>
     </aside>

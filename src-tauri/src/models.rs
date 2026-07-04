@@ -86,6 +86,7 @@ pub struct SettingsDto {
     pub autostart: bool,
     pub debug_mode: bool,
     pub show_completed: bool,
+    pub language: String,
     pub font_family: String,
     pub font_scale: f64,
 }
@@ -99,6 +100,7 @@ impl Default for SettingsDto {
             autostart: false,
             debug_mode: false,
             show_completed: false,
+            language: "system".to_string(),
             font_family: "system".to_string(),
             font_scale: 1.0,
         }
@@ -114,6 +116,7 @@ pub struct SettingsPatch {
     pub autostart: Option<bool>,
     pub debug_mode: Option<bool>,
     pub show_completed: Option<bool>,
+    pub language: Option<String>,
     pub font_family: Option<String>,
     pub font_scale: Option<f64>,
 }

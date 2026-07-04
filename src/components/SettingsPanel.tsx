@@ -1,4 +1,5 @@
 import { LogIn, LogOut, RotateCcw, UserCircle, X } from "lucide-react";
+import { localizeBackendMessage, useI18n } from "../lib/i18n";
 import type { AuthStatus, Settings } from "../lib/types";
 
 type Props = {
@@ -24,36 +25,42 @@ export function SettingsPanel({
   onChange,
   onEnsureLists,
 }: Props) {
+  const { t } = useI18n();
+
   if (!open) return null;
 
   return (
     <aside className="settings-panel">
       <div className="settings-panel__header">
-        <h2>Settings</h2>
-        <button className="icon-button" title="Close settings" onClick={onClose}>
+        <h2>{t("settings.title")}</h2>
+        <button className="icon-button" title={t("settings.close")} onClick={onClose}>
           <X size={16} />
         </button>
       </div>
 
-      <section className={auth.loggedIn ? "settings-group settings-account settings-account--signed-in" : "settings-group settings-account settings-account--signed-out"}>
+      <section
+        className={
+          auth.loggedIn
+            ? "settings-group settings-account settings-account--signed-in"
+            : "settings-group settings-account settings-account--signed-out"
+        }
+      >
         <UserCircle size={30} />
         <div>
-          <strong>{auth.loggedIn ? auth.account || "Microsoft To Do connected" : "Not signed in"}</strong>
+          <strong>{auth.loggedIn ? auth.account || t("settings.msConnected") : t("settings.notSignedIn")}</strong>
           <span>
-            {loginNotice ||
-              (auth.loggedIn
-                ? "Lists and tasks will sync with this device."
-                : "Login to sync Microsoft To Do lists and tasks.")}
+            {(loginNotice && localizeBackendMessage(loginNotice, t)) ||
+              (auth.loggedIn ? t("settings.connectedHint") : t("settings.signedOutHint"))}
           </span>
         </div>
         <button className="text-button" onClick={auth.loggedIn ? onLogout : onLogin}>
           {auth.loggedIn ? <LogOut size={16} /> : <LogIn size={16} />}
-          {auth.loggedIn ? "Logout" : "Login"}
+          {auth.loggedIn ? t("settings.logout") : t("settings.login")}
         </button>
       </section>
 
       <label className="settings-row">
-        <span>Always on top</span>
+        <span>{t("settings.alwaysOnTop")}</span>
         <input
           type="checkbox"
           checked={settings.alwaysOnTop}
@@ -62,7 +69,7 @@ export function SettingsPanel({
       </label>
 
       <label className="settings-row settings-row--stacked">
-        <span>Opacity {Math.round(settings.opacity * 100)}%</span>
+        <span>{t("settings.opacity", { value: Math.round(settings.opacity * 100) })}</span>
         <input
           min={70}
           max={100}
@@ -73,20 +80,32 @@ export function SettingsPanel({
       </label>
 
       <label className="settings-row">
-        <span>Font</span>
+        <span>{t("settings.language")}</span>
+        <select
+          value={settings.language}
+          onChange={(event) => onChange({ language: event.target.value as Settings["language"] })}
+        >
+          <option value="system">{t("settings.languageSystem")}</option>
+          <option value="en">{t("settings.languageEnglish")}</option>
+          <option value="zh-CN">{t("settings.languageChinese")}</option>
+        </select>
+      </label>
+
+      <label className="settings-row">
+        <span>{t("settings.font")}</span>
         <select
           value={settings.fontFamily}
           onChange={(event) => onChange({ fontFamily: event.target.value as Settings["fontFamily"] })}
         >
-          <option value="system">System</option>
-          <option value="compact">Compact</option>
-          <option value="serif">Serif</option>
-          <option value="mono">Mono</option>
+          <option value="system">{t("settings.fontSystem")}</option>
+          <option value="compact">{t("settings.fontCompact")}</option>
+          <option value="serif">{t("settings.fontSerif")}</option>
+          <option value="mono">{t("settings.fontMono")}</option>
         </select>
       </label>
 
       <label className="settings-row settings-row--stacked">
-        <span>Text size {Math.round(settings.fontScale * 100)}%</span>
+        <span>{t("settings.textSize", { value: Math.round(settings.fontScale * 100) })}</span>
         <input
           min={90}
           max={120}
@@ -97,20 +116,20 @@ export function SettingsPanel({
       </label>
 
       <label className="settings-row">
-        <span>Sync interval</span>
+        <span>{t("settings.syncInterval")}</span>
         <select
           value={settings.syncIntervalMinutes}
           onChange={(event) => onChange({ syncIntervalMinutes: Number(event.target.value) })}
         >
-          <option value={1}>1 min</option>
-          <option value={3}>3 min</option>
-          <option value={5}>5 min</option>
-          <option value={10}>10 min</option>
+          <option value={1}>{t("settings.minutes", { count: 1 })}</option>
+          <option value={3}>{t("settings.minutes", { count: 3 })}</option>
+          <option value={5}>{t("settings.minutes", { count: 5 })}</option>
+          <option value={10}>{t("settings.minutes", { count: 10 })}</option>
         </select>
       </label>
 
       <label className="settings-row">
-        <span>Start with Windows</span>
+        <span>{t("settings.startWithOs")}</span>
         <input
           type="checkbox"
           checked={settings.autostart}
@@ -119,7 +138,7 @@ export function SettingsPanel({
       </label>
 
       <label className="settings-row">
-        <span>Show completed tasks</span>
+        <span>{t("settings.showCompleted")}</span>
         <input
           type="checkbox"
           checked={settings.showCompleted}
@@ -128,7 +147,7 @@ export function SettingsPanel({
       </label>
 
       <label className="settings-row">
-        <span>Debug console</span>
+        <span>{t("settings.debugConsole")}</span>
         <input
           type="checkbox"
           checked={settings.debugMode}
@@ -138,7 +157,7 @@ export function SettingsPanel({
 
       <button className="secondary-button" onClick={onEnsureLists}>
         <RotateCcw size={16} />
-        Sync remote lists
+        {t("settings.syncRemoteLists")}
       </button>
     </aside>
   );

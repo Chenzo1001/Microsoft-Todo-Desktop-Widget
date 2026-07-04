@@ -1,5 +1,6 @@
 import { KeyboardEvent, useState } from "react";
 import { Plus } from "lucide-react";
+import { useI18n } from "../lib/i18n";
 import type { ListRole } from "../lib/types";
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export function TaskInput({ disabled, onAdd }: Props) {
+  const { t } = useI18n();
   const [title, setTitle] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -42,7 +44,7 @@ export function TaskInput({ disabled, onAdd }: Props) {
       <input
         value={title}
         disabled={disabled || busy}
-        placeholder="Add a task..."
+        placeholder={t("task.addPlaceholder")}
         onChange={(event) => setTitle(event.target.value)}
         onKeyDown={onKeyDown}
       />

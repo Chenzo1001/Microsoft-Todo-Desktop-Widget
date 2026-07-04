@@ -1,5 +1,6 @@
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
+import { useI18n } from "../lib/i18n";
 import type { ListRole } from "../lib/types";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function QuickAddOverlay({ open, onAdd, onClose }: Props) {
+  const { t } = useI18n();
   const [title, setTitle] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,7 +49,7 @@ export function QuickAddOverlay({ open, onAdd, onClose }: Props) {
       <input
         ref={inputRef}
         value={title}
-        placeholder="Quick add to Inbox..."
+        placeholder={t("quickAdd.placeholder")}
         onChange={(event) => setTitle(event.target.value)}
         onKeyDown={onKeyDown}
       />
