@@ -1,6 +1,8 @@
 node_modules/
 dist/
 src-tauri/target/
+macos-widget/MicrosoftTodoWidget.xcodeproj/
+macos-widget/build/
 .env
 *.log
 .DS_Store

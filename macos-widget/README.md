@@ -87,4 +87,10 @@ YourApp.app/Contents/PlugIns/TodoWidgetExtension.appex
 
 Both the host app and the extension must be signed with matching App Group entitlements.
 
-The current implementation provides the source and shared-data contract. Final release packaging should be wired on a macOS machine after the Apple Developer Team ID and App Group ID are known.
+The repository includes a packaging script for this:
+
+```bash
+npm run tauri:build:mac:widget
+```
+
+Without `MACOS_SIGNING_IDENTITY`, the script uses ad-hoc signing. That is useful for local experiments, but it is not a substitute for Apple Developer signing if you want the widget to be reliably registered by macOS or distributed to other machines.

@@ -10,7 +10,8 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "tauri:build:mac": "tauri build --bundles app,dmg"
+    "tauri:build:mac": "tauri build --bundles app,dmg",
+    "tauri:build:mac:widget": "./scripts/build-macos-with-widget.sh"
   },
   "dependencies": {
     "@tauri-apps/api": "latest",

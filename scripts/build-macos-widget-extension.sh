@@ -17,11 +17,24 @@ fi
 cd "$WIDGET_DIR"
 xcodegen generate
 
-xcodebuild \
+XCODEBUILD_ARGS=(
   -project MicrosoftTodoWidget.xcodeproj \
   -scheme TodoWidgetExtension \
   -configuration Release \
-  -derivedDataPath build \
+  -derivedDataPath build
+)
+
+if [[ -n "${MACOS_SIGNING_IDENTITY:-}" ]]; then
+  XCODEBUILD_ARGS+=("CODE_SIGN_IDENTITY=$MACOS_SIGNING_IDENTITY")
+
+  if [[ -n "${APPLE_DEVELOPMENT_TEAM:-}" ]]; then
+    XCODEBUILD_ARGS+=("DEVELOPMENT_TEAM=$APPLE_DEVELOPMENT_TEAM")
+  fi
+else
+  XCODEBUILD_ARGS+=("CODE_SIGNING_ALLOWED=NO")
+fi
+
+xcodebuild "${XCODEBUILD_ARGS[@]}" \
   build
 
 find "$WIDGET_DIR/build" -name "TodoWidgetExtension.appex" -type d -print

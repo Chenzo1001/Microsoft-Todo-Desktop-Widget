@@ -161,6 +161,24 @@ export MICROSOFT_CLIENT_ID="your Azure app client id"
 npm run tauri:build:mac
 ```
 
+To build the macOS app with the native WidgetKit extension embedded:
+
+```bash
+npm run tauri:build:mac:widget
+```
+
+This produces a signed app bundle with the widget extension at:
+
+```text
+src-tauri/target/release/bundle/macos/ms-todo-desktop-widget.app/Contents/PlugIns/TodoWidgetExtension.appex
+```
+
+and then creates a DMG under:
+
+```text
+src-tauri/target/release/bundle/dmg/
+```
+
 Build outputs are written under:
 
 ```text
@@ -205,7 +223,28 @@ Build the WidgetKit extension on macOS:
 ./scripts/build-macos-widget-extension.sh
 ```
 
-Final release packaging still needs to embed the built `.appex` into the `.app` bundle and sign both the app and extension with matching App Group entitlements.
+Build the full macOS package with the WidgetKit extension embedded:
+
+```bash
+npm run tauri:build:mac:widget
+```
+
+The script embeds the built extension into:
+
+```text
+ms-todo-desktop-widget.app/Contents/PlugIns/TodoWidgetExtension.appex
+```
+
+and signs both the host app and the extension with matching App Group entitlements.
+
+Without `MACOS_SIGNING_IDENTITY`, the script uses ad-hoc signing for local experiments. This can produce a locally runnable `.app`, but it is not a proper distributable WidgetKit package. For a reliable installable release, use an Apple Developer certificate, a real App Group, and matching provisioning/signing settings:
+
+```bash
+export APPLE_DEVELOPMENT_TEAM="your team id"
+export MACOS_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+export MACOS_APP_GROUP_ID="group.com.your-team.ms-todo-desktop-widget"
+npm run tauri:build:mac:widget
+```
 
 ## Data Storage
 
